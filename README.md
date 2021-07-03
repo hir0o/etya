@@ -1,4 +1,4 @@
 # 絵チャ
 
-- socket.to
+- socket.io
 - createjs
