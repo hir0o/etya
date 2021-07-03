@@ -25,63 +25,70 @@
         var shape = new createjs.Shape() // シェイプを作成
         stage.addChild(shape) // ステージに配置
 
-        const mouseMove = (e) => handleMove({ x: e.stageX, y: e.stageY })
-        const mouseUp = (e) => handleUp({ x: e.stageX, y: e.stageY })
-
-        // 描画の開始と終了
-        stage.addEventListener('stagemousedown', (e) => {
+        const hundleDown = (e) => {
           const color = document.querySelector('#inputColor').value
-          handleDown(color, { x: e.stageX, y: event.stageY })
-        })
+          // 送信
+          socket.emit('start', {
+            color,
+            position: { x: e.stageX, y: event.stageY }
+          })
+          // 描画
+          start(color, { x: e.stageX, y: event.stageY })
+
+          // ステージ上でマウスを動かした時
+          stage.addEventListener('stagemousemove', hundleMove)
+          // ステージ上でマウスを離した時
+          stage.addEventListener('stagemouseup', hundleUp)
+        }
+        const hundleMove = (e) => {
+          // 送信
+          socket.emit('move', { x: e.stageX, y: event.stageY })
+          // 描画
+          drawMove({ x: e.stageX, y: e.stageY })
+        }
+        const hundleUp = (e) => {
+          // 送信
+          socket.emit('end', { x: e.stageX, y: event.stageY })
+          // 描画
+          drawEnd({ x: e.stageX, y: e.stageY })
+          // イベントの解除
+          stage.removeEventListener('stagemousemove', hundleMove)
+          stage.removeEventListener('stagemouseup', hundleUp)
+        }
+
+        stage.addEventListener('stagemousedown', hundleDown)
 
         /**
          * 描画開始処理
          * @param string color - 表示する色
          * @param {x: string, y: string} - 描画開始位置
          */
-        const handleDown = (color, { x, y }) => {
+        const start = (color, { x, y }) => {
           // 線の描画を開始
           shape.graphics
             .beginStroke(color) // 任意のカラーで描画
             .moveTo(x, y) // 描画開始位置を指定
-          socket.emit('start', {
-            color,
-            position: { x, y }
-          })
-
-          // ステージ上でマウスを動かした時
-          stage.addEventListener('stagemousemove', mouseMove)
-          // ステージ上でマウスを離した時
-          stage.addEventListener('stagemouseup', mouseUp)
         }
 
         /**
          * 描画処理
          * @param {x: string, y: string} - 描画位置
          */
-        const handleMove = ({ x, y }) => {
+        const drawMove = ({ x, y }) => {
           // マウス座標への線を引く
           shape.graphics.lineTo(x, y)
-          // マウス座標を送信
-          // socket.emit('move', { x, y })
         }
 
         /**
          * 描画終了
          * @param {x: string, y: string} - 描画位置
          */
-        const handleUp = ({ x, y }) => {
+        const drawEnd = ({ x, y }) => {
           // マウス座標への線を引く
           shape.graphics.lineTo(x, y)
-          // マウス座標を送信
-          socket.emit('stop', { x, y })
 
           // 線の描画を終了する
           shape.graphics.endStroke()
-
-          // イベント解除
-          stage.removeEventListener('stagemousemove', mouseMove)
-          stage.removeEventListener('stagemouseup', mouseUp)
         }
 
         createjs.Ticker.timingMode = createjs.Ticker.RAF

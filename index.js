@@ -27,8 +27,8 @@ io.on('connection', (socket) => {
   })
 
   // マウスが動いているイベント
-  socket.on('stop', ({ x, y }) => {
-    console.log('stop')
+  socket.on('end', ({ x, y }) => {
+    console.log('end')
     // socket.broadcast.emit('move', {
     //   x,
     //   y
