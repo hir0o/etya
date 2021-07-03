@@ -30,10 +30,10 @@
           // 送信
           socket.emit('start', {
             color,
-            position: { x: e.stageX, y: event.stageY }
+            position: { x: e.stageX, y: e.stageY }
           })
           // 描画
-          start(color, { x: e.stageX, y: event.stageY })
+          start(color, { x: e.stageX, y: e.stageY })
 
           // ステージ上でマウスを動かした時
           stage.addEventListener('stagemousemove', hundleMove)
@@ -42,13 +42,13 @@
         }
         const hundleMove = (e) => {
           // 送信
-          socket.emit('move', { x: e.stageX, y: event.stageY })
+          socket.emit('move', { x: e.stageX, y: e.stageY })
           // 描画
           drawMove({ x: e.stageX, y: e.stageY })
         }
         const hundleUp = (e) => {
           // 送信
-          socket.emit('end', { x: e.stageX, y: event.stageY })
+          socket.emit('end', { x: e.stageX, y: e.stageY })
           // 描画
           drawEnd({ x: e.stageX, y: e.stageY })
           // イベントの解除
@@ -91,11 +91,28 @@
           shape.graphics.endStroke()
         }
 
+        socket.on('start', (payload) => {
+          start(payload.color, payload.position)
+        })
+        socket.on('move', (payload) => {
+          drawMove({ x: payload.x, y: payload.y })
+        })
+        socket.on('end', (payload) => {
+          drawEnd({ x: payload.x, y: payload.y })
+        })
+
         createjs.Ticker.timingMode = createjs.Ticker.RAF
         createjs.Ticker.addEventListener('tick', onTick)
         function onTick() {
           stage.update() // Stageの描画を更新
         }
+
+        document.querySelector('#buttonReset').addEventListener('click', () => {
+          if (confirm('リセットしてもよろしいですか？')) {
+            // シェイプのグラフィックスを消去
+            shape.graphics.clear()
+          }
+        })
       })
     </script>
   </head>

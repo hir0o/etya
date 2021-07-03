@@ -12,27 +12,24 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', (socket) => {
+  // 自分以外に送信する関数
+  const broadCast = (eventName, payload) =>
+    socket.broadcast.emit(eventName, payload)
+
   // 描画の開始
-  socket.on('start', ({ color, position }) => {
-    console.log('start', color)
+  socket.on('start', (payload) => {
+    console.log(payload)
+    broadCast('start', payload)
   })
 
   // マウスが動いているイベント
-  socket.on('move', ({ x, y }) => {
-    console.log('move')
-    // socket.broadcast.emit('move', {
-    //   x,
-    //   y
-    // })
+  socket.on('move', (payload) => {
+    broadCast('move', payload)
   })
 
-  // マウスが動いているイベント
-  socket.on('end', ({ x, y }) => {
-    console.log('end')
-    // socket.broadcast.emit('move', {
-    //   x,
-    //   y
-    // })
+  // マウスが離れたイベント
+  socket.on('end', (payload) => {
+    broadCast('end', payload)
   })
 
   socket.on('disconnect', () => {
